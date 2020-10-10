@@ -12,11 +12,11 @@ package com.mlx.customrxjava.core
 class MlxSubscribeObservable <T>(val source:MlxObservableOnSubscribe<T>, private val scheduler:Schedulers):MlxObservableOnSubscribe<T>{
 
     override fun subscribe(emitter: MlxObserver<T>){
-        val downStream=MlxSubscribeObserver(emitter,scheduler)
+        val downStream=MlxSubscribeObserver(emitter)
         scheduler.submitSubscribeWork(source,downStream)
     }
 
-    class MlxSubscribeObserver<T>(val emitter:MlxObserver<T>,val scheduler:Schedulers):MlxObserver<T>{
+    class MlxSubscribeObserver<T>(val emitter:MlxObserver<T>):MlxObserver<T>{
 
         override fun onSubscribe() {
             emitter.onSubscribe()

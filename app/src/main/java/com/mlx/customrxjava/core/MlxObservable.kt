@@ -4,7 +4,7 @@ package com.mlx.customrxjava.core
  * Project:CustomRxJava
  * Created by MLX on 2020/10/7.
  */
-open class MlxObservable<T>  constructor(){
+ class MlxObservable<T>  constructor(){
 
     private  var source:MlxObservableOnSubscribe<T>?=null
     private var source2:((MlxObserver<T>)->Unit)?=null
@@ -17,7 +17,7 @@ open class MlxObservable<T>  constructor(){
     }
 
     companion object{
-        fun <T> create(emitter:MlxObservableOnSubscribe<T>):MlxObservable<T>{
+        fun <T> create (emitter:MlxObservableOnSubscribe<T>):MlxObservable<T>{
             return MlxObservable(emitter)
         }
 
@@ -57,8 +57,7 @@ open class MlxObservable<T>  constructor(){
         return MlxObservable(subscribe)
     }
 
-    open fun subscribe(emitter: MlxObserver<T>){
-        println("subscribe ::${this.javaClass.name}")
+    fun subscribe(emitter: MlxObserver<T>){
         emitter.onSubscribe()
         source?.subscribe(emitter)
         source2?.invoke(emitter)

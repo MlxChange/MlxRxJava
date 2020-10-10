@@ -7,12 +7,11 @@ package com.mlx.customrxjava.core
 class MlxMapObservable <T, R>(private val source:MlxObservableOnSubscribe<T>, private val func:((T)->R)):MlxObservableOnSubscribe<R>{
 
     override fun subscribe(emitter: MlxObserver<R>){
-        println("map subscribe")
         val map=MlxMapObserver(emitter,func)
         source.subscribe(map)
     }
 
-    class MlxMapObserver<T,R>(private val emitter:MlxObserver<R>, val func:((T)->R)):MlxObserver<T>{
+    class MlxMapObserver<T,R>(private val emitter:MlxObserver<R>, private val func:((T)->R)):MlxObserver<T>{
 
         override fun onSubscribe() {
             emitter.onSubscribe()

@@ -27,7 +27,7 @@ class Schedulers(){
 
 
     fun <T> submitSubscribeWork(source: MlxObservableOnSubscribe<T>, downStream: MlxObserver<T>) {
-        executorService?.execute {
+        executorService?.submit {
             source.subscribe(downStream)
         }
         handler?.let {
@@ -39,7 +39,7 @@ class Schedulers(){
     }
 
     fun  submitObserverWork(function: () -> Unit) {
-        executorService?.execute {
+        executorService?.submit {
             function.invoke()
         }
         handler?.let {
