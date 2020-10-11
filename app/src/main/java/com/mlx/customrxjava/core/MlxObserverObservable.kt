@@ -4,37 +4,38 @@ package com.mlx.customrxjava.core
  * Project:CustomRxJava
  * Created by MLX on 2020/10/7.
  */
-class MlxObserverObservable <T>(val source:MlxObservableOnSubscribe<T>, private val scheduler:Schedulers):MlxObservableOnSubscribe<T>{
+class MlxObserverObservable<T>(val source: MlxObservableOnSubscribe<T>, private val thread: Int) :
+    MlxObservableOnSubscribe<T> {
 
-    override fun subscribe(emitter: MlxObserver<T>){
-        val downStream=MlxSubscribeObserver(emitter,scheduler)
+    override fun subscribe(emitter: MlxObserver<T>) {
+        val downStream = MlxObserverObserver(emitter, thread)
         source.subscribe(downStream)
     }
 
-    class MlxSubscribeObserver<T>(val emitter:MlxObserver<T>,val scheduler:Schedulers):MlxObserver<T>{
+    class MlxObserverObserver<T>(val emitter: MlxObserver<T>, val thread: Int) : MlxObserver<T> {
 
         override fun onSubscribe() {
-            scheduler.submitObserverWork {
+            Schedulers.INSTANCE.submitObserverWork({
                 emitter.onSubscribe()
-            }
+            }, thread)
         }
 
         override fun onNext(item: T) {
-            scheduler.submitObserverWork {
+            Schedulers.INSTANCE.submitObserverWork({
                 emitter.onNext(item)
-            }
+            }, thread)
         }
 
         override fun onError(e: Throwable) {
-            scheduler.submitObserverWork {
+            Schedulers.INSTANCE.submitObserverWork({
                 emitter.onError(e)
-            }
+            }, thread)
         }
 
         override fun onComplete() {
-            scheduler.submitObserverWork{
+            Schedulers.INSTANCE.submitObserverWork({
                 emitter.onComplete()
-            }
+            }, thread)
         }
 
     }

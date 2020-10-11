@@ -42,7 +42,7 @@ package com.mlx.customrxjava.core
         return MlxObservable(map)
     }
 
-    fun subscribeOn(scheduler:Schedulers):MlxObservable<T>{
+    fun subscribeOn(scheduler:Int):MlxObservable<T>{
         val subscribe=MlxSubscribeObservable(this.source!!,scheduler)
         return MlxObservable(subscribe)
     }
@@ -52,7 +52,7 @@ package com.mlx.customrxjava.core
         return MlxObservable(subscribe)
     }
 
-    fun observerOn(scheduler:Schedulers):MlxObservable<T>{
+    fun observerOn(scheduler:Int):MlxObservable<T>{
         val subscribe=MlxObserverObservable(this.source!!,scheduler)
         return MlxObservable(subscribe)
     }

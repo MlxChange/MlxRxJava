@@ -3,7 +3,6 @@ package com.mlx.customrxjava.core
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -13,59 +12,68 @@ import java.util.concurrent.Executors
 class Schedulers(){
 
 
-    var executorService:ExecutorService?=null
-    var handler:Handler?=null
-
-    constructor(executorService: ExecutorService):this(){
-        this.executorService=executorService
-    }
-
-    constructor(handler: Handler):this(){
-        this.handler=handler
+    private var IOThreadPool =Executors.newCachedThreadPool()
+    private var handler=Handler(Looper.getMainLooper()){ message->
+        message.callback.run()
+        return@Handler true
     }
 
 
 
-    fun <T> submitSubscribeWork(source: MlxObservableOnSubscribe<T>, downStream: MlxObserver<T>) {
-        executorService?.submit {
-            source.subscribe(downStream)
-        }
-        handler?.let {
-            val m=Message.obtain(it){
-                source.subscribe(downStream)
+    fun <T> submitSubscribeWork(source: MlxObservableOnSubscribe<T>, downStream: MlxObserver<T>,thread:Int) {
+        when(thread){
+            IO->{
+                IOThreadPool.submit {
+                    source.subscribe(downStream)
+                }
             }
-            it.sendMessage(m)
+            MAIN->{
+                handler.let {
+                    val message=Message.obtain(it){
+                        source.subscribe(downStream)
+                    }
+                    it.sendMessage(message)
+                }
+            }
         }
+
     }
 
-    fun  submitObserverWork(function: () -> Unit) {
-        executorService?.submit {
-            function.invoke()
-        }
-        handler?.let {
-            val m=Message.obtain(it){
-                function.invoke()
+    fun  submitObserverWork(function: () -> Unit,thread:Int) {
+        when(thread){
+            IO->{
+                IOThreadPool?.submit {
+                    function.invoke()
+                }
             }
-            it.sendMessage(m)
+            MAIN->{
+                handler?.let {
+                    val m=Message.obtain(it){
+                        function.invoke()
+                    }
+                    it.sendMessage(m)
+                }
+            }
         }
     }
 
     companion object{
 
-        private val IO=Executors.newCachedThreadPool()
-
-        fun IO():Schedulers{
-            return Schedulers(IO)
+        val INSTANCE: Schedulers by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            Schedulers()
         }
 
-        fun mainThread():Schedulers{
-            return Schedulers(mainThread)
+        private val IO=0;
+        private val MAIN=1
+
+        fun IO():Int{
+            return IO
         }
 
-        private val mainThread=Handler(Looper.getMainLooper()){message->
-            message.callback.run()
-            return@Handler true
+        fun mainThread():Int{
+            return MAIN
         }
+
     }
 
 
